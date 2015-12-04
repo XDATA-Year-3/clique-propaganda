@@ -1,0 +1,67 @@
+include mixin/panel.jade
+
+doctype html
+head
+    title Clique
+
+    script(src="bower_components/jquery/dist/jquery.min.js")
+    link(rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery-ui.min.css")
+    script(src="bower_components/jquery-ui/jquery-ui.min.js")
+    script(src="bower_components/bootstrap/dist/js/bootstrap.min.js")
+    script(src="bower_components/underscore/underscore-min.js")
+    script(src="bower_components/backbone/backbone-min.js")
+    script(src="bower_components/d3/d3.min.js" charset="utf-8")
+    script(src="bower_components/webcola/WebCola/cola.min.js")
+    script(src="bower_components/clique/clique.js")
+    script(src="bower_components/clique/clique-views.js")
+    script(src="bower_components/pegjs/peg-0.9.0.min.js")
+    script(src="plugin/tangelo/tangelo.js")
+
+    link(rel="stylesheet" href="bower_components/bootswatch/paper/bootstrap.min.css")
+    link(rel="stylesheet" href="index.css")
+
+    script(src="plugin/mongo/mongo.js")
+
+    script(src="index.js")
+
+body
+    nav.navbar.navbar-default
+        .container-fluid
+            .navbar-header
+                a.navbar-brand Clique Demo
+
+    svg(oncontextmenu="return false;")#content
+
+    div.menu-panel(style="position:absolute; left:10px")
+        +panel("query", "Query")(style="width:380px;")
+            .row
+                .col-md-12
+                    .row
+                        .col-md-12 #[input.form-control(placeholder="User ID or Username")#userid]
+                    .row
+                        .col-md-1
+                            a.btn.btn-default#submit Query
+
+        +panel("selection", "Selection")(style="width:380px;")
+            .row
+                .col-md-12
+                    #info
+
+        +panel("link", "Link")(style="width:380px;")
+            .row
+                .col-md-12
+                    #link-info
+
+        +panel("graph", "Graph")(style="width:380px;")
+            .row
+                .col-md-12
+                    label #[input(type="checkbox")#textmode] Display text labels
+
+    #contextmenu.dropdown.clearfix(style="position: absolute; display: none")
+        ul.dropdown-menu(role="menu" ara-labelledby="dropdownMenu" style="display: block; position: static; margin-bottom: 5px")
+            li.dropdown-header.nodelabel
+            li.dropdown-header.activity
+            li #[a.context-expand(href="#") Expand]
+            li #[a.context-collapse(href="#") Collapse]
+            li #[a.context-hide(href="#") Hide]
+            li #[a.context-ungroup(href="#") Ungroup]
