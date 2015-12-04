@@ -114,7 +114,7 @@ $(function () {
             model: graph,
             el: "#content",
             label: function (d) {
-                return d.data.usernames && d.data.usernames[0] || "Group node";
+                return d.data.twitter_id;
             },
             fill: function (d) {
                 // Red for propagandists; blue for audience.
