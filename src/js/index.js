@@ -136,6 +136,30 @@ $(function () {
             rootColor: "gold"
         });
 
+        if (false) {
+            (function () {
+                var orig = view.renderNodes;
+
+                view.renderNodes = _.bind(function (nodes) {
+                    orig(nodes);
+
+                    nodes.each(function (d) {
+                        var that = d3.select(this).select("circle");
+                        console.log("that", that);
+                        graph.adapter.neighborCount(graph.adapter.getAccessor(d.key)).then(function (count) {
+                            console.log("count", count);
+                            var r = that.attr("r");
+                            console.log("r", r);
+                            console.log("r after", r + Math.sqrt(count));
+                            that.transition()
+                                .duration(150)
+                                .attr("r", 10 + Math.sqrt(count));
+                        });
+                    });
+                }, view);
+            }());
+        }
+
         expandNode = function (node) {
             graph.adapter.neighborhood(node, 1, 10).then(function (nbd) {
                 _.each(nbd.nodes, function (n) {
