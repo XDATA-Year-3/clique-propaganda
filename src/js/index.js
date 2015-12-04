@@ -137,7 +137,7 @@ $(function () {
         });
 
         expandNode = function (node) {
-            graph.adapter.neighborhood(node, 1, 5).then(function (nbd) {
+            graph.adapter.neighborhood(node, 1, 10).then(function (nbd) {
                 _.each(nbd.nodes, function (n) {
                     graph.addNode(n, nbd.links);
                 });
