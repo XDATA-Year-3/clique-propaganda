@@ -10,7 +10,6 @@ $(function () {
     launch = function (_cfg) {
         var mongoStore,
             graph,
-            listSearch,
             view,
             info,
             linkInfo,
@@ -30,18 +29,6 @@ $(function () {
         window.graph = graph = new clique.Graph({
             adapter: new tangelo.plugin.mongo.Mongo(mongoStore)
         });
-
-        window.listSearch = listSearch = function (field, value) {
-            return $.getJSON("assets/listsearch", _.extend({}, mongoStore, {
-                field: field,
-                value: value
-            })).then(function (results) {
-                var oids = _.pluck(_.pluck(results, "_id"), "$oid");
-                return $.when.apply($, _.map(oids, graph.adapter.findNodeByKey, graph.adapter));
-            }).then(function () {
-                return _.toArray(arguments);
-            });
-        };
 
         ungroup = function (node) {
             var fromLinks,
@@ -100,38 +87,6 @@ $(function () {
             }, this));
         };
 
-        (function () {
-            var request = null,
-                action;
-
-            action = _.debounce(function () {
-                var filename = $("#filename").val();
-
-                if (request) {
-                    request.abort();
-                }
-
-                request = $.getJSON("assets/tangelo/anb/get_nodes", {
-                    host: cfg.host,
-                    db: cfg.database,
-                    coll: cfg.collection,
-                    filename: filename
-                }).then(function (nodes) {
-                    request = null;
-
-                    $("#label").autocomplete({
-                        source: nodes,
-                        minLength: 0
-                    }).focus(function () {
-                        $(this).autocomplete("search", $(this).val());
-                    });
-                });
-            }, 300);
-
-            $("#filename").on("input", action);
-            $("#filename").on("autocompleteselect", action);
-        }());
-
         $("#submit").on("click", function () {
             var userid = $("#userid").val(),
                 spec = {};
@@ -144,19 +99,7 @@ $(function () {
                 id: userid
             };
 
-            graph.adapter.findNode(spec).then(function (center) {
-                var next;
-
-                if (_.isUndefined(center)) {
-                    next = listSearch("usernames", userid);
-                } else {
-                    next = $.when([center]);
-                }
-
-                return next;
-            }).then(function (results) {
-                graph.addNodes(results);
-            });
+            graph.adapter.findNode(spec).then(_.bind(graph.addNode, graph));
         });
 
         colormap = d3.scale.category10();
@@ -569,16 +512,6 @@ $(function () {
                 if (node) {
                     graph.addNode(node);
                     expandNode(node);
-                }
-            });
-        }
-
-        // Do the same for a username in the query arguments.
-        if (_.has(args, "username")) {
-            listSearch("usernames", args.username).then(function (nodes) {
-                if (_.size(nodes) > 0) {
-                    graph.addNode(nodes[0]);
-                    expandNode(nodes[0]);
                 }
             });
         }
