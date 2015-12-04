@@ -212,19 +212,6 @@ $(function () {
                             return "ID: " + d.data.twitter_id;
                         });
 
-                    ul.select("li.activity")
-                        .text(function () {
-                            if (d.data.grouped) {
-                                return "(This node represents a group of users.)";
-                            } else if (!d.data.active) {
-                                return "(This user has sent no messages and was only mentioned by someone else.)";
-                            } else if (d.data.geolocated) {
-                                return "(This user has sent at least one geolocated message.)";
-                            } else {
-                                return "(This user has sent only sent non-geolocated messages.)";
-                            }
-                        });
-
                     ul.select("a.context-hide")
                         .on("click", _.bind(clique.view.SelectionInfo.hideNode, info, node));
 
