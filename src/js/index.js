@@ -96,7 +96,7 @@ $(function () {
             }
 
             spec = {
-                id: userid
+                twitter_id: userid
             };
 
             graph.adapter.findNode(spec).then(_.bind(graph.addNode, graph));
@@ -507,7 +507,7 @@ $(function () {
         // if found.
         if (_.has(args, "id")) {
             graph.adapter.findNode({
-                id: args.id
+                twitter_id: args.id
             }).then(function (node) {
                 if (node) {
                     graph.addNode(node);
