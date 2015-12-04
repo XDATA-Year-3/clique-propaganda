@@ -32,7 +32,7 @@ def main():
                 node_table[ident] = oid = ObjectId()
                 print bson.json_util.dumps({"_id": oid,
                                             "type": "node",
-                                            "data": {"twitter_id": ident,
+                                            "data": {"twitter_id": p,
                                                      "type": "propagandist"}})
 
             print bson.json_util.dumps({"_id": ObjectId(),
