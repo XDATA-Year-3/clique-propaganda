@@ -209,13 +209,7 @@ $(function () {
 
                     ul.select("li.nodelabel")
                         .text(function () {
-                            var label = d.data.usernames && d.data.usernames[0] || "Group node";
-
-                            if (_.size(d.data.fullnames) > 0) {
-                                label += " (" + d.data.fullnames[0] + ")";
-                            }
-
-                            return label;
+                            return "ID: " + d.data.twitter_id;
                         });
 
                     ul.select("li.activity")
