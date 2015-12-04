@@ -42,6 +42,19 @@ body
                         .col-md-1
                             a.btn.btn-default#submit Query
 
+        +panel("info", "Info")(style="width:380px")
+            .row
+                .col-md-12
+                    .row
+                        h5#urls-title.hidden Propaganda URLs Viewed
+                        #urls.col-md-12(style="max-height:100px; overflow-y:auto;")
+                    .row
+                        h5#times-title.hidden Times Viewed
+                        #times.col-md-12(style="max-height:200px; overflow-y:auto;")
+                    .row
+                        h5#places-title.hidden Locations (Long/Lat)
+                        #places.col-md-12(style="max-height:200px; overflow-y:auto;")
+
         +panel("graph", "Graph")(style="width:380px;")
             .row
                 .col-md-12
@@ -50,7 +63,6 @@ body
     #contextmenu.dropdown.clearfix(style="position: absolute; display: none")
         ul.dropdown-menu(role="menu" ara-labelledby="dropdownMenu" style="display: block; position: static; margin-bottom: 5px")
             li.dropdown-header.nodelabel
-            li.dropdown-header.activity
             li #[a.context-expand(href="#") Expand]
             li #[a.context-collapse(href="#") Collapse]
             li #[a.context-hide(href="#") Hide]

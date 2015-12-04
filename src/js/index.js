@@ -295,147 +295,8 @@ $(function () {
         });
         window.info = info = new clique.view.SelectionInfo({
             model: view.selection,
-            el: "#info",
-            graph: graph,
-            selectionButtons: [
-                {
-                    label: "Hide",
-                    color: "purple",
-                    icon: "eye-close",
-                    repeat: true,
-                    callback: function (node) {
-                        _.bind(clique.view.SelectionInfo.hideNode, this)(node);
-                    }
-                },
-                {
-                    label: "Group",
-                    color: "blue",
-                    icon: "paperclip",
-                    callback: function (selection) {
-                        var nodes,
-                            links,
-                            powerNode,
-                            reqs;
-
-                        // Extract keys from node selection.
-                        nodes = _.map(selection, function (n) {
-                            return n.key();
-                        });
-                        // nodes = _.invoke(selection, "key");
-
-                        // Get all links going to or from nodes in the
-                        // selection.
-                        //
-                        // Start by issuing ajax calls to look for links with
-                        // each node as source and target.
-                        reqs = _.flatten(_.map(nodes, _.bind(function (n) {
-                            return [
-                                this.graph.adapter.findLinks({
-                                    source: n
-                                }),
-                                this.graph.adapter.findLinks({
-                                    target: n
-                                })
-                            ];
-                        }, this)));
-
-                        // Issue a jquery when call to wait for all the requests
-                        // to finish.
-                        $.when.apply($, reqs).then(_.bind(function () {
-                            // Collect the links from the function arguments,
-                            // omitting the "shadow" halves of bidirectional
-                            // links.
-                            links = _.filter(Array.prototype.concat.apply([], _.toArray(arguments)), function (l) {
-                                return !(l.getData("bidir") && l.getData("reference"));
-                            });
-
-                            // Create a new node that will serve as the power
-                            // node.
-                            return this.graph.adapter.createNode({
-                                grouped: true
-                            });
-                        }, this)).then(_.bind(function (_powerNode) {
-                            var inclusionReqs,
-                                connectivityReqs,
-                                reqs,
-                                key;
-
-                            powerNode = _powerNode;
-                            key = powerNode.key();
-
-                            // Create inclusion links for new power node.
-                            inclusionReqs = _.map(nodes, _.bind(function (n) {
-                                return this.graph.adapter.createLink(key, n, {
-                                    grouping: true
-                                });
-                            }, this));
-
-                            // Create connectivity links for new power node.
-                            connectivityReqs = _.map(links, _.bind(function (link) {
-                                var obj = {},
-                                    source,
-                                    target;
-
-                                _.each(link.getAllData(), function (value, key) {
-                                    obj[key] = value;
-                                });
-
-                                source = _.contains(nodes, link.source()) ? key : link.source();
-                                target = _.contains(nodes, link.target()) ? key : link.target();
-
-                                if (source !== key || target !== key) {
-                                    return this.graph.adapter.createLink(source, target, obj);
-                                }
-                            }, this));
-
-                            reqs = inclusionReqs.concat(_.compact(connectivityReqs));
-
-                            return $.when.apply($, reqs);
-                        }, this)).then(_.bind(function () {
-                            var newLinks = _.toArray(arguments);
-
-                            // Fill in any necessary "shadow" halves of
-                            // bidirectional links.
-                            return _.map(newLinks, _.bind(function (link) {
-                                var reqs = [];
-
-                                if (link.getData("bidir")) {
-                                    reqs.push(this.graph.adapter.createLink(link.target(), link.source(), {
-                                        bidir: true,
-                                        reference: link.key()
-                                    }));
-                                }
-
-                                return reqs;
-                            }, this));
-                        }, this)).then(_.bind(function () {
-                            // Delete the original selection's nodes.
-                            _.each(selection, clique.view.SelectionInfo.deleteNode, this);
-                        }, this)).then(_.bind(function () {
-                            // Add the new node to the graph.
-                            this.graph.addNode(powerNode);
-                        }, this));
-                    }
-                },
-                {
-                    label: "Expand",
-                    color: "blue",
-                    icon: "fullscreen",
-                    repeat: true,
-                    callback: expandNode
-                },
-                {
-                    label: "Collapse",
-                    color: "blue",
-                    icon: "resize-small",
-                    repeat: true,
-                    callback: function (node) {
-                        _.bind(clique.view.SelectionInfo.collapseNode, this)(node);
-                    }
-                }
-            ]
+            graph: graph
         });
-        info.render();
 
         linkInfo = new clique.view.LinkInfo({
             model: view.linkSelection,
@@ -481,6 +342,84 @@ $(function () {
 
         linkInfo.model.on("change", fixup);
         linkInfo.graph.on("change", fixup);
+
+        view.selection.on("focused", function (focusKey) {
+            var node,
+                data;
+
+            if (_.isUndefined(focusKey)) {
+                d3.select("#urls-title")
+                    .classed("hidden", true);
+
+                d3.select("#times-title")
+                    .classed("hidden", true);
+
+                d3.select("#places-title")
+                    .classed("hidden", true);
+
+                d3.select("#urls")
+                    .selectAll("*")
+                    .remove();
+
+                d3.select("#times")
+                    .selectAll("*")
+                    .remove();
+
+                d3.select("#places")
+                    .selectAll("*")
+                    .remove();
+
+                return;
+            }
+
+            node = graph.adapter.getAccessor(focusKey);
+
+            data = node.getData("propaganda_urls_exposed_to");
+            if (data) {
+                d3.select("#urls-title")
+                    .classed("hidden", false);
+
+                d3.select("#urls")
+                    .selectAll("a")
+                    .data(data)
+                    .enter()
+                    .append("a")
+                    .attr("href", _.identity)
+                    .text(function (d, i) {
+                        return "url" + (i+1) + " ";
+                    });
+            }
+
+            data = node.getData("timestamps_of_propaganda");
+            if (data) {
+                d3.select("#times-title")
+                    .classed("hidden", false);
+
+                d3.select("#times")
+                    .selectAll("span")
+                    .data(data)
+                    .enter()
+                    .append("span")
+                    .html(function (d) {
+                        return new Date(d) + "<br>";
+                    });
+            }
+
+            data = node.getData("geos");
+            if (data) {
+                d3.select("#places-title")
+                    .classed("hidden", false);
+
+                d3.select("#places")
+                    .selectAll("span")
+                    .data(data)
+                    .enter()
+                    .append("span")
+                    .html(function (d) {
+                        return "(" + d[0] + ", " + d[1] + ")" + "<br>";
+                    });
+            }
+        });
 
         if (cfg.titan && cfg.graphCentrality) {
             $("button.nodecentrality").on("click", function () {
