@@ -208,7 +208,7 @@ $(function () {
 
                     ul.select("li.nodelabel")
                         .text(function () {
-                            return "ID: " + d.data.twitter_id;
+                            return "ID: " + d.data.twitter_id + " (" + d.key + ")";
                         });
 
                     ul.select("a.context-hide")
