@@ -29,7 +29,7 @@ def main():
         for p in record["propagandists_followed"]:
             oid = node_table.get(p)
             if oid is None:
-                node_table[ident] = oid = ObjectId()
+                node_table[p] = oid = ObjectId()
                 print bson.json_util.dumps({"_id": oid,
                                             "type": "node",
                                             "data": {"twitter_id": p,
